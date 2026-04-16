@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Browse Items — ReWear</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+.browse-layout { display: grid; grid-template-columns: 240px 1fr; gap: 32px; padding: 40px 48px; max-width: 1280px; margin: 0 auto; }
+.filter-panel  { position: sticky; top: 88px; height: fit-content; }
+.filter-card   { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+.filter-card h4 { font-weight: 700; font-size: 14px; margin-bottom: 14px; text-transform: uppercase; letter-spacing: .05em; color: var(--mid); }
+.filter-group  { margin-bottom: 24px; }
+.filter-group select, .filter-group input { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-family: var(--ff-body); outline: none; }
+.filter-group select:focus, .filter-group input:focus { border-color: var(--green); }
+.search-bar    { display: flex; gap: 12px; margin-bottom: 24px; }
+.search-bar input { flex: 1; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: var(--radius); font-size: 15px; font-family: var(--ff-body); outline: none; }
+.search-bar input:focus { border-color: var(--green); }
+.pagination    { display: flex; justify-content: center; gap: 8px; margin-top: 40px; }
+.page-btn      { width: 38px; height: 38px; border-radius: 8px; border: 1.5px solid var(--border); background: #fff; font-size: 14px; font-weight: 600; transition: all .2s; }
+.page-btn:hover, .page-btn.active { background: var(--green); color: #fff; border-color: var(--green); }
+@media(max-width:768px){ .browse-layout{grid-template-columns:1fr;padding:20px} .filter-panel{position:static} }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">Re<span>Wear</span></a>
+  <div class="nav-links"><a href="index.html">Home</a><a href="browse.html" style="color:var(--green)">Browse</a><a href="add-item.html">List Item</a><a href="dashboard.html">Dashboard</a></div>
+  <div class="nav-actions">
+    <div data-show-auth><button class="btn-ghost" onclick="location.href='index.html'">Login</button></div>
+    <div data-show-user style="display:none" class="nav-user-info">
+      <div class="nav-user-chip"><img src="images/avatar-placeholder.png" data-nav-avatar class="nav-avatar" alt="av"><span data-nav-name>User</span><span class="pts-badge" data-nav-points>0 pts</span></div>
+      <button class="btn-ghost btn-sm" data-logout>Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="browse-layout">
+  <!-- Filters -->
+  <aside class="filter-panel">
+    <div class="filter-card">
+      <div class="filter-group">
+        <h4>Category</h4>
+        <select id="fCategory" onchange="applyFilters()">
+          <option value="">All Categories</option>
+          <option value="TOPS">Tops</option><option value="BOTTOMS">Bottoms</option>
+          <option value="DRESSES">Dresses</option><option value="OUTERWEAR">Outerwear</option>
+          <option value="SHOES">Shoes</option><option value="ACCESSORIES">Accessories</option>
+          <option value="BAGS">Bags</option><option value="ETHNIC">Ethnic</option>
+          <option value="WINTERWEAR">Winterwear</option><option value="KIDS">Kids</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <h4>Size</h4>
+        <select id="fSize" onchange="applyFilters()">
+          <option value="">All Sizes</option>
+          <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <h4>Condition</h4>
+        <select id="fCondition" onchange="applyFilters()">
+          <option value="">Any Condition</option>
+          <option value="LIKE_NEW">Like New</option><option value="EXCELLENT">Excellent</option>
+          <option value="GOOD">Good</option><option value="FAIR">Fair</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <h4>Max Points</h4>
+        <input type="number" id="fMaxPts" placeholder="e.g. 500" min="0" oninput="debounceFilters()">
+      </div>
+      <button class="btn-ghost full-w" onclick="clearFilters()">Clear Filters</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search items, brands, tags…" oninput="debounceFilters()">
+      <button class="btn-primary" onclick="applyFilters()">Search</button>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <p id="resultsCount" style="font-size:14px;color:var(--light)">Loading…</p>
+      <select id="sortBy" onchange="applyFilters()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:var(--ff-body);outline:none">
+        <option value="newest">Newest First</option>
+        <option value="pts_low">Points: Low to High</option>
+        <option value="pts_high">Points: High to Low</option>
+      </select>
+    </div>
+    <div class="items-grid" id="browseGrid"></div>
+    <div class="pagination" id="pagination"></div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+let currentPage = 1;
+let debounceTimer;
+
+async function loadItems(page = 1) {
+  currentPage = page;
+  const grid = document.getElementById("browseGrid");
+  grid.innerHTML = '<div class="loading-cards">' + Array(8).fill('<div class="skeleton-card"></div>').join("") + "</div>";
+
+  const params = { page, limit: 12 };
+  const cat  = document.getElementById("fCategory").value;
+  const size = document.getElementById("fSize").value;
+  const cond = document.getElementById("fCondition").value;
+  const maxP = document.getElementById("fMaxPts").value;
+  const q    = document.getElementById("searchInput").value.trim();
+
+  if (cat)  params.category  = cat;
+  if (size) params.size      = size;
+  if (cond) params.condition = cond;
+  if (maxP) params.maxPoints = maxP;
+  if (q)    params.search    = q;
+
+  try {
+    const { items, pagination } = await Api.items.getAll(params);
+    document.getElementById("resultsCount").textContent = `${pagination.total} item${pagination.total!==1?"s":""} found`;
+    grid.innerHTML = items.length
+      ? items.map(item => `
+        <div class="item-card">
+          <div class="item-img-wrap">
+            <img src="${item.images?.[0]||'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=400'}" alt="${item.title}" class="item-img" onerror="this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=400'">
+            <span class="item-cond">${Api.fmtStatus(item.condition)}</span>
+            <button class="wish-btn" onclick="addWish(${item.id}, this)" title="Wishlist">♡</button>
+          </div>
+          <div class="item-body">
+            <p class="item-brand">${item.brand||"No brand"} · Size ${item.size}</p>
+            <h4 class="item-title">${item.title}</h4>
+            <div class="item-foot">
+              <span class="item-pts">${item.points} pts</span>
+              <button class="btn-primary btn-sm" onclick="requestItem(${item.id}, this)">Request</button>
+            </div>
+          </div>
+        </div>`).join("")
+      : '<p class="empty-msg">No items found. Try adjusting your filters.</p>';
+
+    renderPagination(pagination);
+  } catch(err) {
+    grid.innerHTML = `<p class="empty-msg" style="color:#dc2626">${err.message}</p>`;
+  }
+}
+
+function renderPagination({ page, totalPages }) {
+  const el = document.getElementById("pagination");
+  if (totalPages <= 1) { el.innerHTML = ""; return; }
+  let html = "";
+  for (let i = 1; i <= totalPages; i++) {
+    html += `<button class="page-btn${i===page?" active":""}" onclick="loadItems(${i})">${i}</button>`;
+  }
+  el.innerHTML = html;
+}
+
+function applyFilters()  { currentPage=1; loadItems(1); }
+function debounceFilters(){ clearTimeout(debounceTimer); debounceTimer=setTimeout(applyFilters, 380); }
+function clearFilters()  {
+  ["fCategory","fSize","fCondition"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("fMaxPts").value="";
+  document.getElementById("searchInput").value="";
+  applyFilters();
+}
+
+async function requestItem(itemId, btn) {
+  if (!Api.isLoggedIn()) { alert("Please log in to request items."); location.href="index.html"; return; }
+  const note = prompt("Add a note to the seller (optional):");
+  btn.disabled=true; btn.textContent="Requesting…";
+  try {
+    await Api.orders.request(itemId, note);
+    btn.textContent="Requested ✓"; btn.style.background="#16a34a";
+    Api.toast("Request sent! 🎉");
+  } catch(e) { Api.toastErr(e.message); btn.disabled=false; btn.textContent="Request"; }
+}
+
+async function addWish(itemId, btn) {
+  if (!Api.isLoggedIn()) { alert("Please log in to save items."); return; }
+  try { await Api.wishlist.add(itemId); btn.textContent="♥"; btn.style.color="#dc2626"; Api.toast("Added to wishlist!"); }
+  catch(e) { Api.toastErr(e.message); }
+}
+
+loadItems();
+</script>
+</body>
+</html>

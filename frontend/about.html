@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>About — ReWear</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<nav class="nav">
+  <a href="index.html" class="nav-logo">Re<span>Wear</span></a>
+  <div class="nav-links"><a href="index.html">Home</a><a href="browse.html">Browse</a><a href="add-item.html">List Item</a></div>
+  <div class="nav-actions">
+    <div data-show-auth><button class="btn-ghost" onclick="location.href='index.html'">Login</button></div>
+    <div data-show-user style="display:none" class="nav-user-info">
+      <div class="nav-user-chip"><img src="images/avatar-placeholder.png" data-nav-avatar class="nav-avatar" alt="av"><span data-nav-name>User</span></div>
+      <button class="btn-ghost btn-sm" data-logout>Logout</button>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" style="min-height:50vh;grid-template-columns:1fr;text-align:center;justify-items:center">
+  <div class="hero-content" style="max-width:640px">
+    <div class="hero-badge">Our Mission</div>
+    <h1 class="hero-title" style="font-size:clamp(36px,5vw,64px)">Fashion Forward,<br><em>Planet First.</em></h1>
+    <p class="hero-sub">ReWear was born from a simple belief: great style shouldn't cost the earth. We're building the most trusted community for pre-loved fashion in India.</p>
+  </div>
+  <div class="mission-image">
+                    <img src="images/mission.jpg" alt="Sustainable fashion community">
+                </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center">
+      <div>
+        <h2 class="section-title">Why ReWear?</h2>
+        <p style="color:var(--mid);line-height:1.8;margin-bottom:16px">The fashion industry is one of the world's largest polluters. Every year, millions of garments end up in landfills while perfectly wearable clothes sit unused in wardrobes.</p>
+        <p style="color:var(--mid);line-height:1.8;margin-bottom:16px">ReWear creates a circular economy for clothing. When you list an item, you earn points. When you claim an item, you spend points. No money changes hands — just a community sharing what they love.</p>
+        <p style="color:var(--mid);line-height:1.8">Every exchange on ReWear saves water, reduces carbon emissions, and keeps clothing out of landfills. Together, our community has already prevented over 100 tonnes of textile waste.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div style="background:var(--green-bg);border-radius:var(--radius);padding:28px;text-align:center"><div style="font-family:var(--ff-head);font-size:36px;font-weight:700;color:var(--green)">25K+</div><div style="color:var(--mid);font-size:14px;margin-top:4px">Active Members</div></div>
+        <div style="background:var(--cream);border-radius:var(--radius);padding:28px;text-align:center"><div style="font-family:var(--ff-head);font-size:36px;font-weight:700;color:var(--green)">50K+</div><div style="color:var(--mid);font-size:14px;margin-top:4px">Items Exchanged</div></div>
+        <div style="background:var(--cream);border-radius:var(--radius);padding:28px;text-align:center"><div style="font-family:var(--ff-head);font-size:36px;font-weight:700;color:var(--green)">100T</div><div style="color:var(--mid);font-size:14px;margin-top:4px">Waste Prevented</div></div>
+        <div style="background:var(--green-bg);border-radius:var(--radius);padding:28px;text-align:center"><div style="font-family:var(--ff-head);font-size:36px;font-weight:700;color:var(--green)">4.9★</div><div style="color:var(--mid);font-size:14px;margin-top:4px">Avg. User Rating</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section bg-soft">
+  <div class="container centered">
+    <h2 class="section-title centered">Ready to join?</h2>
+    <p style="color:var(--mid);margin-bottom:32px">Start with 100 free points just for signing up.</p>
+    <a href="index.html" class="btn-primary btn-lg">Get Started Free</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <span class="nav-logo">Re<span>Wear</span></span>
+    <div class="footer-links"><a href="browse.html">Browse</a><a href="add-item.html">List Item</a><a href="about.html">About</a></div>
+    <p class="footer-copy">© 2024 ReWear. All rights reserved.</p>
+  </div>
+</footer>
+<script src="js/api.js"></script>
+</body>
+</html>

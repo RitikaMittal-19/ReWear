@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard — ReWear</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">Re<span>Wear</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="browse.html">Browse</a>
+    <a href="add-item.html">List Item</a>
+    <a href="admin.html" data-admin-only style="display:none">Admin</a>
+  </div>
+  <div class="nav-actions">
+    <div data-show-user style="display:none" class="nav-user-info">
+      <div class="nav-user-chip">
+        <img src="images/avatar-placeholder.png" data-nav-avatar class="nav-avatar" alt="avatar">
+        <span data-nav-name>User</span>
+        <span class="pts-badge" data-nav-points>0 pts</span>
+      </div>
+      <button class="btn-ghost btn-sm" data-logout>Logout</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Profile Header -->
+<div class="page-header">
+  <div class="dash-profile">
+    <img id="dashAvatar" src="images/avatar-placeholder.png" class="dash-avatar" alt="avatar">
+    <div>
+      <div class="dash-name" id="dashName">Loading…</div>
+      <div class="dash-meta" id="dashMeta"></div>
+    </div>
+    <a href="add-item.html" class="btn-primary" style="margin-left:auto">+ List New Item</a>
+  </div>
+  <div class="dash-stats">
+    <div class="dash-stat"><div class="dash-stat-val" id="statPoints">—</div><div class="dash-stat-lbl">Points</div></div>
+    <div class="dash-stat"><div class="dash-stat-val" id="statItems">—</div><div class="dash-stat-lbl">Listed</div></div>
+    <div class="dash-stat"><div class="dash-stat-val" id="statExchanges">—</div><div class="dash-stat-lbl">Exchanges</div></div>
+    <div class="dash-stat"><div class="dash-stat-val" id="statRating">—</div><div class="dash-stat-lbl">Rating</div></div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="dash-tabs">
+  <button class="dash-tab active" data-tab="items">My Items</button>
+  <button class="dash-tab" data-tab="exchanges">Exchanges</button>
+  <button class="dash-tab" data-tab="wishlist">Wishlist</button>
+  <button class="dash-tab" data-tab="profile">Profile</button>
+</div>
+
+<div class="dash-content">
+  <!-- Items -->
+  <div class="tab-pane active" id="tab-items">
+    <div id="myItemsList"><p class="empty-msg">Loading…</p></div>
+  </div>
+
+  <!-- Exchanges -->
+  <div class="tab-pane" id="tab-exchanges">
+    <div id="myExchangesList"><p class="empty-msg">Loading…</p></div>
+  </div>
+
+  <!-- Wishlist -->
+  <div class="tab-pane" id="tab-wishlist">
+    <div id="myWishlist"><p class="empty-msg">Loading…</p></div>
+  </div>
+
+  <!-- Profile -->
+  <div class="tab-pane" id="tab-profile">
+    <div class="section-card" style="max-width:560px">
+      <h3>Edit Profile</h3>
+      <form id="profileForm">
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" id="pfFirst"></div>
+          <div class="form-group"><label>Last Name</label><input type="text" id="pfLast"></div>
+        </div>
+        <div class="form-group"><label>Email (cannot change)</label><input type="email" id="pfEmail" disabled></div>
+        <div class="form-group"><label>Bio</label><textarea id="pfBio" rows="3"></textarea></div>
+        <div class="form-group"><label>Location</label><input type="text" id="pfLocation"></div>
+        <div class="form-group"><label>Avatar</label><input type="file" id="pfAvatar" accept="image/*"></div>
+        <div id="profileMsg" class="form-error" style="display:none"></div>
+        <button type="submit" id="pfBtn" class="btn-primary">Save Changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+// ── Auth guard ─────────────────────────────────────────────────
+if (!Api.isLoggedIn()) { Api.toastErr("Please log in first."); setTimeout(()=>location.href="index.html",900); }
+
+// ── Tabs ───────────────────────────────────────────────────────
+document.querySelectorAll(".dash-tab").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".dash-tab").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".tab-pane").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-"+btn.dataset.tab).classList.add("active");
+  });
+});
+
+// ── Load all data ──────────────────────────────────────────────
+(async () => {
+  try {
+    const [meR, ordersR, wishR, itemsR] = await Promise.all([
+      Api.auth.me(), Api.orders.getMine(), Api.wishlist.get(), Api.items.getMine()
+    ]);
+    const u = meR.user;
+    const { buying, selling } = ordersR;
+
+    // Header
+    document.getElementById("dashName").textContent = `${u.firstName} ${u.lastName}`;
+    document.getElementById("dashMeta").textContent = `Member since ${new Date(u.createdAt).toLocaleDateString("en-IN",{month:"long",year:"numeric"})} · ${u.rating?.toFixed(1)||"New"} ⭐`;
+    if (u.avatar) document.getElementById("dashAvatar").src = u.avatar;
+    document.getElementById("statPoints").textContent    = u.points;
+    document.getElementById("statItems").textContent     = itemsR.items.length;
+    document.getElementById("statExchanges").textContent = [...buying,...selling].filter(o=>o.status==="COMPLETED").length;
+    document.getElementById("statRating").textContent    = u.rating ? u.rating.toFixed(1)+" ⭐" : "New";
+
+    // Profile form
+    document.getElementById("pfFirst").value    = u.firstName;
+    document.getElementById("pfLast").value     = u.lastName;
+    document.getElementById("pfEmail").value    = u.email;
+    document.getElementById("pfBio").value      = u.bio||"";
+    document.getElementById("pfLocation").value = u.location||"";
+
+    // Items tab
+    const il = document.getElementById("myItemsList");
+    il.innerHTML = itemsR.items.length ? itemsR.items.map(item=>`
+      <div class="list-card">
+        <img src="${item.images?.[0]||'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=200'}" alt="${item.title}">
+        <div class="list-card-body">
+          <div class="list-card-title">${item.title}</div>
+          <div class="list-card-sub">${item.views} views · ${item.points} pts</div>
+        </div>
+        <div class="list-card-right">
+          <span class="status-pill" style="background:${Api.statusBg(item.status)};color:${Api.statusColor(item.status)}">${Api.fmtStatus(item.status)}</span>
+          <button onclick="delItem(${item.id})" class="btn-ghost btn-sm" style="border-color:#dc2626;color:#dc2626">Delete</button>
+        </div>
+      </div>`).join("") : '<p class="empty-msg">No listings yet. <a href="add-item.html" style="color:var(--green)">List your first item →</a></p>';
+
+    // Exchanges tab
+    const allOrders = [...buying.map(o=>({...o,role:"buyer"})), ...selling.map(o=>({...o,role:"seller"}))].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    const el = document.getElementById("myExchangesList");
+    el.innerHTML = allOrders.length ? allOrders.map(o=>`
+      <div class="list-card">
+        <img src="${o.item?.images?.[0]||'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=200'}" alt="${o.item?.title}">
+        <div class="list-card-body">
+          <div class="list-card-title">${o.role==="buyer"?"Requested":"Received request for"}: ${o.item?.title}</div>
+          <div class="list-card-sub">${o.role==="buyer"?`Seller: ${o.seller?.firstName} ${o.seller?.lastName}`:`Buyer: ${o.buyer?.firstName} ${o.buyer?.lastName}`} · ${o.pointsUsed} pts · ${Api.timeAgo(o.createdAt)}</div>
+        </div>
+        <div class="list-card-right">
+          <span class="status-pill" style="background:${Api.statusBg(o.status)};color:${Api.statusColor(o.status)}">${Api.fmtStatus(o.status)}</span>
+          ${o.role==="seller"&&o.status==="REQUESTED"?`
+            <button onclick="acceptOrd(${o.id})" class="btn-primary btn-sm">Accept</button>
+            <button onclick="rejectOrd(${o.id})" class="btn-ghost btn-sm" style="border-color:#dc2626;color:#dc2626">Reject</button>`:``}
+        </div>
+      </div>`).join("") : '<p class="empty-msg">No exchanges yet.</p>';
+
+    // Wishlist tab
+    const wl = document.getElementById("myWishlist");
+    wl.innerHTML = wishR.wishlist.length ? wishR.wishlist.map(w=>`
+      <div class="list-card">
+        <img src="${w.item?.images?.[0]||'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=200'}" alt="${w.item?.title}">
+        <div class="list-card-body">
+          <div class="list-card-title">${w.item?.title}</div>
+          <div class="list-card-sub">by ${w.item?.seller?.firstName} ${w.item?.seller?.lastName} · ${w.item?.points} pts</div>
+        </div>
+        <div class="list-card-right">
+          <button onclick="removeWish(${w.item?.id})" class="btn-ghost btn-sm">Remove</button>
+        </div>
+      </div>`).join("") : '<p class="empty-msg">Your wishlist is empty.</p>';
+
+  } catch(err) { Api.toastErr(err.message||"Failed to load dashboard."); }
+})();
+
+// ── Profile form ───────────────────────────────────────────────
+document.getElementById("profileForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const btn = document.getElementById("pfBtn");
+  const fd = new FormData();
+  fd.append("firstName", document.getElementById("pfFirst").value.trim());
+  fd.append("lastName",  document.getElementById("pfLast").value.trim());
+  fd.append("bio",       document.getElementById("pfBio").value.trim());
+  fd.append("location",  document.getElementById("pfLocation").value.trim());
+  const av = document.getElementById("pfAvatar").files[0];
+  if (av) fd.append("avatar", av);
+  btn.disabled=true; btn.textContent="Saving…";
+  try {
+    const r = await Api.users.updateMe(fd);
+    Api.setUser(r.user); Api.updateNav();
+    Api.toast("Profile updated!");
+  } catch(err) {
+    const m = document.getElementById("profileMsg");
+    m.textContent=err.message; m.style.display="block";
+  } finally { btn.disabled=false; btn.textContent="Save Changes"; }
+});
+
+// ── Actions ────────────────────────────────────────────────────
+async function delItem(id)    { if(!confirm("Delete this listing?")) return; try { await Api.items.delete(id); Api.toast("Deleted."); setTimeout(()=>location.reload(),700); } catch(e){Api.toastErr(e.message);} }
+async function acceptOrd(id)  { try { await Api.orders.accept(id); Api.toast("Accepted! Points transferred. 🎉"); setTimeout(()=>location.reload(),800); } catch(e){Api.toastErr(e.message);} }
+async function rejectOrd(id)  { try { await Api.orders.reject(id); Api.toast("Request rejected.","info"); setTimeout(()=>location.reload(),700); } catch(e){Api.toastErr(e.message);} }
+async function removeWish(id) { try { await Api.wishlist.remove(id); Api.toast("Removed.","info"); setTimeout(()=>location.reload(),700); } catch(e){Api.toastErr(e.message);} }
+</script>
+</body>
+</html>

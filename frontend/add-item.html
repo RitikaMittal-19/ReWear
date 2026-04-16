@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>List an Item — ReWear</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">Re<span>Wear</span></a>
+  <div class="nav-links"><a href="index.html">Home</a><a href="browse.html">Browse</a><a href="dashboard.html">Dashboard</a></div>
+  <div class="nav-actions">
+    <div data-show-user style="display:none" class="nav-user-info">
+      <div class="nav-user-chip"><img src="images/avatar-placeholder.png" data-nav-avatar class="nav-avatar" alt="av"><span data-nav-name>User</span><span class="pts-badge" data-nav-points>0 pts</span></div>
+      <button class="btn-ghost btn-sm" data-logout>Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="add-item-page">
+  <h1 style="font-family:var(--ff-head);font-size:36px;margin-bottom:8px">List Your Item</h1>
+  <p style="color:var(--light);margin-bottom:32px">Share your pre-loved fashion with the ReWear community</p>
+
+  <form id="addItemForm" novalidate>
+
+    <!-- Photos -->
+    <div class="section-card">
+      <h3>📷 Photos <span style="font-size:13px;font-weight:400;color:var(--light)">(up to 5, required)</span></h3>
+      <div class="photo-upload-grid" id="photoGrid">
+        <div class="add-photo-btn-box" id="addPhotoBtn" onclick="document.getElementById('photoInput').click()">
+          <span style="font-size:24px">+</span>
+          <span>Add Photo</span>
+        </div>
+      </div>
+      <input type="file" id="photoInput" accept="image/*" multiple style="display:none">
+    </div>
+
+    <!-- Basic Info -->
+    <div class="section-card">
+      <h3>📝 Basic Information</h3>
+      <div class="form-group"><label>Item Title *</label><input type="text" id="iiTitle" placeholder="e.g. Floral Maxi Dress by Zara" required></div>
+      <div class="form-group"><label>Brand</label><input type="text" id="iiBrand" placeholder="e.g. Zara, H&M, FabIndia"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Category *</label>
+          <select id="iiCategory" required>
+            <option value="">Select Category</option>
+            <option value="TOPS">Tops</option><option value="BOTTOMS">Bottoms</option>
+            <option value="DRESSES">Dresses</option><option value="OUTERWEAR">Outerwear</option>
+            <option value="SHOES">Shoes</option><option value="ACCESSORIES">Accessories</option>
+            <option value="BAGS">Bags</option><option value="ETHNIC">Ethnic</option>
+            <option value="WINTERWEAR">Winterwear</option><option value="KIDS">Kids</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Size *</label>
+          <select id="iiSize" required>
+            <option value="">Select Size</option>
+            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>OTHER</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Description *</label><textarea id="iiDesc" rows="4" placeholder="Be honest about condition, include measurements if helpful" required></textarea></div>
+    </div>
+
+    <!-- Exchange Details -->
+    <div class="section-card">
+      <h3>💚 Exchange Details</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Condition *</label>
+          <select id="iiCondition" required>
+            <option value="">Select Condition</option>
+            <option value="LIKE_NEW">Like New</option><option value="EXCELLENT">Excellent</option>
+            <option value="GOOD">Good</option><option value="FAIR">Fair</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Points Value * <span id="ptsSuggestion" style="font-weight:400;color:var(--green);font-size:12px"></span></label>
+          <input type="number" id="iiPoints" min="10" max="999" placeholder="e.g. 65" required>
+        </div>
+      </div>
+      <div class="form-group"><label>Exchange Type</label>
+        <select id="iiExchangeType">
+          <option value="POINTS_ONLY">Points Only</option>
+          <option value="DIRECT_TRADE">Direct Trade</option>
+          <option value="POINTS_OR_TRADE">Points or Trade</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Trade Preferences (optional)</label><input type="text" id="iiTradePrefs" placeholder="e.g. Looking for winter jackets size M"></div>
+    </div>
+
+    <!-- Tags -->
+    <div class="section-card">
+      <h3>🏷 Tags</h3>
+      <div class="form-group">
+        <label>Add tags (press Enter or comma)</label>
+        <input type="text" id="tagInput" placeholder="e.g. boho, summer, floral">
+      </div>
+      <div id="tagChips"></div>
+    </div>
+
+    <div id="addItemError" class="form-error" style="display:none"></div>
+    <div style="display:flex;gap:12px;margin-top:8px">
+      <button type="submit" id="submitBtn" class="btn-primary btn-lg">🌿 List Item</button>
+      <a href="dashboard.html" class="btn-ghost btn-lg">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+if (!Api.isLoggedIn()) { alert("Please log in to list an item."); location.href = "index.html"; }
+
+// ── Photos ─────────────────────────────────────────────────────
+let selectedFiles = [];
+
+document.getElementById("photoInput").addEventListener("change", function() {
+  const newFiles = Array.from(this.files);
+  const slots = 5 - selectedFiles.length;
+  if (newFiles.length > slots) Api.toastErr(`Only ${slots} more photo(s) allowed.`);
+  selectedFiles = [...selectedFiles, ...newFiles.slice(0, slots)];
+  renderPhotos();
+  this.value = "";
+});
+
+function renderPhotos() {
+  const grid = document.getElementById("photoGrid");
+  const btn  = document.getElementById("addPhotoBtn");
+  grid.innerHTML = "";
+  selectedFiles.forEach((f, i) => {
+    const url = URL.createObjectURL(f);
+    const div = document.createElement("div");
+    div.style.cssText = "position:relative;width:100px;height:100px;border-radius:10px;overflow:hidden;flex-shrink:0";
+    div.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover">
+      <button type="button" onclick="removePhoto(${i})" style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;border:none;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center">✕</button>
+      ${i===0?'<span style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);color:#fff;font-size:10px;text-align:center;padding:2px">Cover</span>':""}`;
+    grid.appendChild(div);
+  });
+  if (selectedFiles.length < 5) grid.appendChild(btn);
+}
+
+function removePhoto(i) { selectedFiles.splice(i, 1); renderPhotos(); }
+
+// ── Points suggestion ──────────────────────────────────────────
+const ptsSugg = { LIKE_NEW:"80–120", EXCELLENT:"50–80", GOOD:"30–50", FAIR:"10–30" };
+document.getElementById("iiCondition").addEventListener("change", function() {
+  document.getElementById("ptsSuggestion").textContent = ptsSugg[this.value] ? `Suggested: ${ptsSugg[this.value]} pts` : "";
+});
+
+// ── Tags ───────────────────────────────────────────────────────
+let tags = [];
+document.getElementById("tagInput").addEventListener("keydown", function(e) {
+  if ((e.key === "Enter" || e.key === ",") && this.value.trim()) {
+    e.preventDefault();
+    const t = this.value.trim().replace(/,/g,"").toLowerCase();
+    if (t && !tags.includes(t) && tags.length < 10) { tags.push(t); renderTags(); }
+    this.value = "";
+  }
+});
+function renderTags() {
+  document.getElementById("tagChips").innerHTML = tags.map((t,i)=>
+    `<span class="tag-chip">#${t}<button type="button" onclick="removeTag(${i})">✕</button></span>`).join("");
+}
+function removeTag(i) { tags.splice(i,1); renderTags(); }
+
+// ── Submit ─────────────────────────────────────────────────────
+document.getElementById("addItemForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById("addItemError");
+  errEl.style.display = "none";
+
+  const title     = document.getElementById("iiTitle").value.trim();
+  const brand     = document.getElementById("iiBrand").value.trim();
+  const category  = document.getElementById("iiCategory").value;
+  const size      = document.getElementById("iiSize").value;
+  const desc      = document.getElementById("iiDesc").value.trim();
+  const condition = document.getElementById("iiCondition").value;
+  const points    = document.getElementById("iiPoints").value;
+  const exchType  = document.getElementById("iiExchangeType").value;
+  const tradePrefs= document.getElementById("iiTradePrefs").value.trim();
+
+  if (!title)     { errEl.textContent="Title is required."; errEl.style.display="block"; return; }
+  if (!category)  { errEl.textContent="Please select a category."; errEl.style.display="block"; return; }
+  if (!size)      { errEl.textContent="Please select a size."; errEl.style.display="block"; return; }
+  if (!desc)      { errEl.textContent="Description is required."; errEl.style.display="block"; return; }
+  if (!condition) { errEl.textContent="Please select a condition."; errEl.style.display="block"; return; }
+  if (!points || isNaN(+points) || +points < 10) { errEl.textContent="Points must be at least 10."; errEl.style.display="block"; return; }
+  if (selectedFiles.length === 0) { errEl.textContent="Please add at least one photo."; errEl.style.display="block"; return; }
+
+  const fd = new FormData();
+  fd.append("title", title);
+  fd.append("brand", brand);
+  fd.append("category", category);
+  fd.append("size", size);
+  fd.append("description", desc);
+  fd.append("condition", condition);
+  fd.append("points", points);
+  fd.append("exchangeType", exchType);
+  fd.append("tradePrefs", tradePrefs);
+  tags.forEach(t => fd.append("tags", t));
+  selectedFiles.forEach(f => fd.append("images", f));
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true; btn.textContent = "Uploading…";
+
+  try {
+    const data = await Api.items.create(fd);
+    Api.toast("Item listed successfully! 🎉");
+    setTimeout(() => location.href = "dashboard.html", 1000);
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = "block";
+    btn.disabled = false; btn.textContent = "🌿 List Item";
+  }
+});
+</script>
+</body>
+</html>

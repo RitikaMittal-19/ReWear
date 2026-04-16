@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Panel — ReWear</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+.admin-wrap   { max-width:1200px; margin:0 auto; padding:40px 48px; }
+.admin-header { margin-bottom:32px; }
+.admin-header h1 { font-family:var(--ff-head);font-size:36px; }
+.admin-header p  { color:var(--light);margin-top:6px; }
+.admin-grid   { display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:40px; }
+.admin-stat   { background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow); }
+.admin-stat-val { font-family:var(--ff-head);font-size:38px;font-weight:700;color:var(--green); }
+.admin-stat-lbl { font-size:13px;color:var(--light);margin-top:2px; }
+.admin-tabs   { display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:28px; }
+.admin-tab    { padding:12px 22px;font-size:14px;font-weight:600;color:var(--light);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;transition:all .2s; }
+.admin-tab.active { color:var(--green);border-bottom-color:var(--green); }
+.tab-pane     { display:none; }
+.tab-pane.active { display:block; }
+.tbl          { width:100%;border-collapse:collapse;font-size:14px; }
+.tbl th       { text-align:left;padding:12px 16px;border-bottom:2px solid var(--border);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--light); }
+.tbl td       { padding:14px 16px;border-bottom:1px solid var(--border);vertical-align:middle; }
+.tbl tr:hover td { background:var(--warm); }
+.tbl img      { width:44px;height:44px;border-radius:8px;object-fit:cover; }
+.tbl-avatar   { width:36px;height:36px;border-radius:50%;object-fit:cover; }
+.action-btns  { display:flex;gap:6px;flex-wrap:wrap; }
+.status-pill  { font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600; }
+.search-row   { display:flex;gap:12px;margin-bottom:20px; }
+.search-row input { flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:var(--ff-body);outline:none; }
+.search-row input:focus { border-color:var(--green); }
+@media(max-width:768px){ .admin-wrap{padding:20px} .tbl th,.tbl td{padding:10px 8px;font-size:12px} }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">Re<span>Wear</span></a>
+  <div class="nav-links"><a href="index.html">Home</a><a href="browse.html">Browse</a><a href="dashboard.html">Dashboard</a></div>
+  <div class="nav-actions">
+    <div data-show-user style="display:none" class="nav-user-info">
+      <div class="nav-user-chip"><img src="images/avatar-placeholder.png" data-nav-avatar class="nav-avatar" alt="av"><span data-nav-name></span><span class="pts-badge" data-nav-points></span></div>
+      <button class="btn-ghost btn-sm" data-logout>Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="admin-wrap">
+  <div class="admin-header">
+    <h1>⚙️ Admin Panel</h1>
+    <p>Manage users, listings, and orders across the ReWear platform.</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="admin-grid">
+    <div class="admin-stat"><div class="admin-stat-val" id="stUsers">—</div><div class="admin-stat-lbl">Total Users</div></div>
+    <div class="admin-stat"><div class="admin-stat-val" id="stItems">—</div><div class="admin-stat-lbl">Total Listings</div></div>
+    <div class="admin-stat"><div class="admin-stat-val" id="stOrders">—</div><div class="admin-stat-lbl">Total Orders</div></div>
+    <div class="admin-stat"><div class="admin-stat-val" id="stDone">—</div><div class="admin-stat-lbl">Completed</div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="admin-tabs">
+    <button class="admin-tab active" data-tab="users">Users</button>
+    <button class="admin-tab" data-tab="items">Listings</button>
+    <button class="admin-tab" data-tab="orders">Orders</button>
+  </div>
+
+  <!-- Users -->
+  <div class="tab-pane active" id="tab-users">
+    <div class="search-row">
+      <input type="text" id="userSearch" placeholder="Search by name or email…" oninput="debounce(loadUsers, 380)()">
+    </div>
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead><tr><th>User</th><th>Email</th><th>Points</th><th>Listings</th><th>Status</th><th>Role</th><th>Actions</th></tr></thead>
+        <tbody id="usersTbody"><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--light)">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Items -->
+  <div class="tab-pane" id="tab-items">
+    <div class="search-row">
+      <select id="itemStatusFilter" onchange="loadAdminItems()" style="padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:var(--ff-body);outline:none">
+        <option value="">All Statuses</option>
+        <option value="ACTIVE">Active</option>
+        <option value="ARCHIVED">Archived</option>
+        <option value="EXCHANGED">Exchanged</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead><tr><th>Image</th><th>Title</th><th>Seller</th><th>Category</th><th>Points</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="itemsTbody"><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--light)">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Orders -->
+  <div class="tab-pane" id="tab-orders">
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead><tr><th>ID</th><th>Item</th><th>Buyer</th><th>Seller</th><th>Points</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody id="ordersTbody"><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--light)">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+// ── Auth guard — admin only ────────────────────────────────────
+const currentUser = Api.getUser();
+if (!Api.isLoggedIn() || currentUser?.role !== "ADMIN") {
+  alert("Admin access required.");
+  location.href = "index.html";
+}
+
+// ── Tabs ───────────────────────────────────────────────────────
+document.querySelectorAll(".admin-tab").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".admin-tab").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+  });
+});
+
+// ── Debounce ───────────────────────────────────────────────────
+function debounce(fn, delay) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+}
+
+// ── Load Stats ─────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const s = await Api.admin.getStats();
+    document.getElementById("stUsers").textContent  = s.totalUsers;
+    document.getElementById("stItems").textContent  = s.totalItems;
+    document.getElementById("stOrders").textContent = s.totalOrders;
+    document.getElementById("stDone").textContent   = s.completedOrders;
+  } catch(e) { Api.toastErr(e.message); }
+}
+
+// ── Load Users ─────────────────────────────────────────────────
+async function loadUsers() {
+  const search = document.getElementById("userSearch").value.trim();
+  const tbody = document.getElementById("usersTbody");
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--light)">Loading…</td></tr>`;
+  try {
+    const { users } = await Api.admin.getUsers(search ? { search } : {});
+    if (!users.length) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--light)">No users found.</td></tr>`; return; }
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td><div style="display:flex;align-items:center;gap:10px"><img src="${u.avatar||'images/avatar-placeholder.png'}" class="tbl-avatar"><strong>${u.firstName} ${u.lastName}</strong></div></td>
+        <td style="color:var(--light)">${u.email}</td>
+        <td><strong style="color:var(--green)">${u.points}</strong></td>
+        <td>${u._count.listings}</td>
+        <td><span class="status-pill" style="background:${u.isActive?"#dcfce7":"#fee2e2"};color:${u.isActive?"#16a34a":"#dc2626"}">${u.isActive?"Active":"Inactive"}</span></td>
+        <td><span class="status-pill" style="background:${u.role==="ADMIN"?"#ede9fe":"#f3f4f6"};color:${u.role==="ADMIN"?"#7c3aed":"#6b7280"}">${u.role}</span></td>
+        <td><div class="action-btns">
+          <button onclick="toggleUser(${u.id},${!u.isActive})" class="btn-ghost btn-sm" style="border-color:${u.isActive?"#dc2626":"#16a34a"};color:${u.isActive?"#dc2626":"#16a34a"}">${u.isActive?"Deactivate":"Activate"}</button>
+          ${u.role!=="ADMIN"?`<button onclick="makeAdmin(${u.id})" class="btn-ghost btn-sm" style="border-color:#7c3aed;color:#7c3aed">Make Admin</button>`:""}
+        </div></td>
+      </tr>`).join("");
+  } catch(e) { Api.toastErr(e.message); }
+}
+
+// ── Load Listings ──────────────────────────────────────────────
+async function loadAdminItems() {
+  const status = document.getElementById("itemStatusFilter").value;
+  const tbody  = document.getElementById("itemsTbody");
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--light)">Loading…</td></tr>`;
+  try {
+    const { items } = await Api.admin.getItems(status ? { status } : {});
+    if (!items.length) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--light)">No listings found.</td></tr>`; return; }
+    tbody.innerHTML = items.map(item => `
+      <tr>
+        <td><img src="${item.images?.[0]||'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=80'}" alt="${item.title}" style="border-radius:8px"></td>
+        <td><strong>${item.title}</strong><br><span style="font-size:12px;color:var(--light)">${item.views} views</span></td>
+        <td style="color:var(--light)">${item.seller?.firstName} ${item.seller?.lastName}</td>
+        <td>${item.category}</td>
+        <td><strong style="color:var(--green)">${item.points}</strong></td>
+        <td><span class="status-pill" style="background:${Api.statusBg(item.status)};color:${Api.statusColor(item.status)}">${Api.fmtStatus(item.status)}</span></td>
+        <td><div class="action-btns">
+          ${item.status==="ACTIVE"?`<button onclick="archiveItem(${item.id})" class="btn-ghost btn-sm" style="border-color:#d97706;color:#d97706">Archive</button>`:""}
+          ${item.status==="ARCHIVED"?`<button onclick="restoreItem(${item.id})" class="btn-ghost btn-sm" style="border-color:#16a34a;color:#16a34a">Restore</button>`:""}
+        </div></td>
+      </tr>`).join("");
+  } catch(e) { Api.toastErr(e.message); }
+}
+
+// ── Load Orders ────────────────────────────────────────────────
+async function loadAdminOrders() {
+  const tbody = document.getElementById("ordersTbody");
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--light)">Loading…</td></tr>`;
+  try {
+    const { orders } = await Api.admin.getOrders();
+    if (!orders.length) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--light)">No orders found.</td></tr>`; return; }
+    tbody.innerHTML = orders.map(o => `
+      <tr>
+        <td style="font-weight:700;color:var(--light)">#${o.id}</td>
+        <td><strong>${o.item?.title}</strong></td>
+        <td>${o.buyer?.firstName} ${o.buyer?.lastName}<br><span style="font-size:12px;color:var(--light)">${o.buyer?.email}</span></td>
+        <td>${o.seller?.firstName} ${o.seller?.lastName}<br><span style="font-size:12px;color:var(--light)">${o.seller?.email}</span></td>
+        <td><strong style="color:var(--green)">${o.pointsUsed}</strong></td>
+        <td><span class="status-pill" style="background:${Api.statusBg(o.status)};color:${Api.statusColor(o.status)}">${Api.fmtStatus(o.status)}</span></td>
+        <td style="font-size:13px;color:var(--light)">${new Date(o.createdAt).toLocaleDateString("en-IN")}</td>
+      </tr>`).join("");
+  } catch(e) { Api.toastErr(e.message); }
+}
+
+// ── Action handlers ────────────────────────────────────────────
+async function toggleUser(id, activate) {
+  if (!confirm(`${activate?"Activate":"Deactivate"} this user?`)) return;
+  try { await Api.admin.updateUser(id, { isActive: activate }); Api.toast(`User ${activate?"activated":"deactivated"}.`); loadUsers(); }
+  catch(e) { Api.toastErr(e.message); }
+}
+
+async function makeAdmin(id) {
+  if (!confirm("Grant admin privileges to this user?")) return;
+  try { await Api.admin.updateUser(id, { role: "ADMIN" }); Api.toast("User is now an admin."); loadUsers(); }
+  catch(e) { Api.toastErr(e.message); }
+}
+
+async function archiveItem(id) {
+  if (!confirm("Archive this listing?")) return;
+  try { await Api.admin.updateItem(id, "ARCHIVED"); Api.toast("Listing archived."); loadAdminItems(); }
+  catch(e) { Api.toastErr(e.message); }
+}
+
+async function restoreItem(id) {
+  try { await Api.admin.updateItem(id, "ACTIVE"); Api.toast("Listing restored."); loadAdminItems(); }
+  catch(e) { Api.toastErr(e.message); }
+}
+
+// ── Init ───────────────────────────────────────────────────────
+loadStats();
+loadUsers();
+loadAdminItems();
+loadAdminOrders();
+</script>
+</body>
+</html>

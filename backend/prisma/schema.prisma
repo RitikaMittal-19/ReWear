@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ItemStatus {
+  ACTIVE
+  EXCHANGED
+  ARCHIVED
+}
+
+enum ItemCondition {
+  LIKE_NEW
+  EXCELLENT
+  GOOD
+  FAIR
+}
+
+enum ExchangeType {
+  POINTS_ONLY
+  DIRECT_TRADE
+  POINTS_OR_TRADE
+}
+
+enum Category {
+  TOPS
+  BOTTOMS
+  DRESSES
+  OUTERWEAR
+  SHOES
+  ACCESSORIES
+  BAGS
+  ETHNIC
+  WINTERWEAR
+  KIDS
+}
+
+enum Size {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
+  OTHER
+}
+
+enum OrderStatus {
+  REQUESTED
+  ACCEPTED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
+  password       String
+  firstName      String
+  lastName       String
+  bio            String?
+  location       String?
+  avatar         String?
+  points         Int       @default(100)
+  role           Role      @default(USER)
+  rating         Float     @default(0)
+  reviewCount    Int       @default(0)
+  preferredSizes String?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  listings     Item[]     @relation("UserListings")
+  ordersBuyer  Order[]    @relation("BuyerOrders")
+  ordersSeller Order[]    @relation("SellerOrders")
+  wishlist     Wishlist[]
+
+  @@index([email])
+}
+
+model Item {
+  id           Int           @id @default(autoincrement())
+  title        String
+  description  String
+  brand        String?
+  category     Category
+  size         Size
+  condition    ItemCondition
+  points       Int
+  exchangeType ExchangeType  @default(POINTS_ONLY)
+  tradePrefs   String?
+  tags         String[]
+  images       String[]
+  status       ItemStatus    @default(ACTIVE)
+  views        Int           @default(0)
+  sellerId     Int
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  seller      User       @relation("UserListings", fields: [sellerId], references: [id], onDelete: Cascade)
+  orders      Order[]
+  wishlistedBy Wishlist[]
+
+  @@index([sellerId])
+  @@index([category])
+  @@index([status])
+}
+
+model Order {
+  id         Int         @id @default(autoincrement())
+  itemId     Int
+  buyerId    Int
+  sellerId   Int
+  pointsUsed Int
+  status     OrderStatus @default(REQUESTED)
+  note       String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  item   Item @relation(fields: [itemId], references: [id])
+  buyer  User @relation("BuyerOrders", fields: [buyerId], references: [id])
+  seller User @relation("SellerOrders", fields: [sellerId], references: [id])
+
+  @@index([buyerId])
+  @@index([sellerId])
+}
+
+model Wishlist {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  itemId    Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId])
+  @@index([userId])
+}

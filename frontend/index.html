@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReWear — Exchange, Refresh, Rewear</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ── NAV ──────────────────────────────────────────────────── -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo">Re<span>Wear</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="browse.html">Browse</a>
+    <a href="add-item.html">List Item</a>
+    <a href="about.html">About</a>
+    <a href="admin.html" data-admin-only style="display:none">Admin</a>
+  </div>
+  <div class="nav-actions">
+    <div data-show-auth>
+      <button class="btn-ghost" onclick="openModal('loginModal')">Login</button>
+      <button class="btn-primary" onclick="openModal('signupModal')">Sign Up</button>
+    </div>
+    <div data-show-user style="display:none" class="nav-user-info">
+      <a href="dashboard.html" class="nav-user-chip">
+        <img src="images/avatar-placeholder.png" data-nav-avatar class="nav-avatar" alt="avatar">
+        <span data-nav-name>User</span>
+        <span class="pts-badge" data-nav-points>0 pts</span>
+      </a>
+      <button class="btn-ghost btn-sm" data-logout>Logout</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-bg-orb orb1"></div>
+  <div class="hero-bg-orb orb2"></div>
+  <div class="hero-content">
+    <h1 class="hero-title">Exchange.<br>Refresh.<br><em>Rewear.</em></h1>
+    <p class="hero-sub">Join thousands of fashion lovers building a sustainable future through clothing exchange. Earn points, discover unique pieces, reduce waste.</p>
+    <div class="hero-ctas">
+      <a href="browse.html" class="btn-primary btn-lg">Start Browsing</a>
+      <a href="#how-it-works" class="btn-outline btn-lg">How it Works</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><strong>25K+</strong><span>Members</span></div>
+      <div class="stat"><strong>50K+</strong><span>Exchanges</span></div>
+      <div class="stat"><strong>100T</strong><span>Waste Saved</span></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-img-stack">
+      <img src="images/classic versace dress.jpg" alt="fashion 1" class="himg h1">
+      <img src="images/item2.jpg" alt="fashion 2" class="himg h2">
+      <img src="images/category-women.jpg" alt="fashion 3" class="himg h3">
+    </div>
+  </div>
+</section>
+
+<!-- ── CATEGORIES ────────────────────────────────────────────── -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Shop by Category</h2>
+    <div class="categories">
+      <button class="cat-btn active" data-cat="">All</button>
+      <button class="cat-btn" data-cat="TOPS">Tops</button>
+      <button class="cat-btn" data-cat="BOTTOMS">Bottoms</button>
+      <button class="cat-btn" data-cat="DRESSES">Dresses</button>
+      <button class="cat-btn" data-cat="OUTERWEAR">Outerwear</button>
+      <button class="cat-btn" data-cat="ETHNIC">Ethnic</button>
+      <button class="cat-btn" data-cat="ACCESSORIES">Accessories</button>
+      <button class="cat-btn" data-cat="SHOES">Shoes</button>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- ── FEATURED ITEMS ────────────────────────────────────────── -->
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-title">Featured Items</h2>
+      <a href="browse.html" class="link-arrow">View all →</a>
+    </div>
+    <div class="items-grid" id="featuredItems">
+      <div class="loading-cards">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+ <section class="section" id="categories">
+  <div class="container">
+      <h2 class="section-title">Browse pre-loved fashion for every style</h2>
+   
+    <div class="features-grid">
+      <div class="feature-card category-card" style="background-image: url('images/category-men.jpg');">
+        <div class="category-overlay">Men</div>
+      </div>
+      <div class="feature-card category-card" style="background-image: url('images/category-women.jpg');">
+        <div class="category-overlay">Women</div>
+      </div>
+      <div class="feature-card category-card" style="background-image: url('images/category-kids.jpg');">
+        <div class="category-overlay">Kids</div>
+      </div>
+      <div class="feature-card category-card" style="background-image: url('images/category-jackets.jpg');">
+        <div class="category-overlay">Ethnic</div>
+      </div>
+      <div class="feature-card category-card" style="background-image: url('images/category-winterwear.jpg');">
+        <div class="category-overlay">Winterwear</div>
+      </div>
+      <div class="feature-card category-card" style="background-image: url('images/category-j.jpg');">
+        <div class="category-overlay">Accessories</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ──────────────────────────────────────────── -->
+<section class="section bg-soft" id="how-it-works">
+  <div class="container">
+    <h2 class="section-title centered">How It Works</h2>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><h3>List Your Items</h3><p>Upload photos of clothes you no longer wear. Earn points based on quality and demand.</p></div>
+      <div class="step-arrow">→</div>
+      <div class="step"><div class="step-num">2</div><h3>Browse & Discover</h3><p>Explore thousands of unique pieces. Filter by category, size, and condition.</p></div>
+      <div class="step-arrow">→</div>
+      <div class="step"><div class="step-num">3</div><h3>Exchange & Enjoy</h3><p>Use your points to claim items. Request, accept, and enjoy your new wardrobe.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ──────────────────────────────────────────────────── -->
+<section class="section cta-section">
+  <div class="container centered">
+    <h2 class="section-title">Ready to start?</h2>
+    <p style="opacity:.7;margin-bottom:32px">Join thousands of fashion lovers making a difference, one exchange at a time.</p>
+    <button class="btn-primary btn-lg" onclick="openModal('signupModal')">Get Started Free</button>
+  </div>
+</section>
+
+<!-- ── FOOTER ────────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand"><span class="nav-logo">Re<span>Wear</span></span><p>Sustainable fashion for everyone.</p></div>
+    <div class="footer-links">
+      <a href="browse.html">Browse</a>
+      <a href="add-item.html">List Item</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="about.html">About</a>
+    </div>
+    <p class="footer-copy">© 2024 ReWear. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- ══ LOGIN MODAL ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="loginModal" onclick="if(event.target===this)closeModal('loginModal')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
+    <h2 class="modal-title">Welcome Back</h2>
+    <p class="modal-sub">Sign in to your ReWear account</p>
+    <form id="loginForm" novalidate>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required>
+      </div>
+      <div id="loginError" class="form-error" style="display:none"></div>
+      <button type="submit" id="loginBtn" class="btn-primary full-w">Sign In</button>
+    </form>
+    <p class="modal-switch">Don't have an account? <button class="link-btn" onclick="switchModal('loginModal','signupModal')">Sign up</button></p>
+  </div>
+</div>
+
+<!-- ══ SIGNUP MODAL ═════════════════════════════════════════════ -->
+<div class="modal-overlay" id="signupModal" onclick="if(event.target===this)closeModal('signupModal')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('signupModal')">✕</button>
+    <h2 class="modal-title">Join ReWear</h2>
+    <p class="modal-sub">Start your sustainable fashion journey</p>
+    <form id="signupForm" novalidate>
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" id="signupFirst" placeholder="Priya" required>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" id="signupLast" placeholder="Sharma" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="signupPassword" placeholder="Min. 6 characters" required>
+      </div>
+      <div class="form-group checkbox-row">
+        <input type="checkbox" id="signupTerms">
+        <label for="signupTerms">I agree to the <a href="#" class="link-inline">Terms of Service</a></label>
+      </div>
+      <div id="signupError" class="form-error" style="display:none"></div>
+      <button type="submit" id="signupBtn" class="btn-primary full-w">Create Account</button>
+    </form>
+    <p class="modal-switch">Already have an account? <button class="link-btn" onclick="switchModal('signupModal','loginModal')">Sign in</button></p>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+// ── Modal helpers ──────────────────────────────────────────────
+function openModal(id)   { document.getElementById(id).classList.add("open"); document.body.style.overflow="hidden"; }
+function closeModal(id)  { document.getElementById(id).classList.remove("open"); document.body.style.overflow=""; }
+function switchModal(a,b){ closeModal(a); openModal(b); }
+function setLoading(btn, loading, text) { btn.disabled = loading; btn.textContent = loading ? "Please wait…" : text; }
+function showErr(id, msg) { const el=document.getElementById(id); el.textContent=msg; el.style.display="block"; }
+function hideErr(id)      { document.getElementById(id).style.display="none"; }
+
+// ── Login ──────────────────────────────────────────────────────
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  hideErr("loginError");
+  const email    = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const btn      = document.getElementById("loginBtn");
+  if (!email || !password) return showErr("loginError", "Please fill in all fields.");
+  setLoading(btn, true, "Sign In");
+  try {
+    const data = await Api.auth.login({ email, password });
+    Api.setToken(data.token);
+    Api.setUser(data.user);
+    closeModal("loginModal");
+    Api.toast(`Welcome back, ${data.user.firstName}! 👋`);
+    Api.updateNav();
+    setTimeout(() => window.location.href = "dashboard.html", 900);
+  } catch (err) {
+    showErr("loginError", err.message);
+    setLoading(btn, false, "Sign In");
+  }
+});
+
+// ── Signup ────────────────────────────────────────────────────
+document.getElementById("signupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  hideErr("signupError");
+  const firstName = document.getElementById("signupFirst").value.trim();
+  const lastName  = document.getElementById("signupLast").value.trim();
+  const email     = document.getElementById("signupEmail").value.trim();
+  const password  = document.getElementById("signupPassword").value;
+  const terms     = document.getElementById("signupTerms").checked;
+  const btn       = document.getElementById("signupBtn");
+  if (!firstName || !lastName || !email || !password) return showErr("signupError", "Please fill in all fields.");
+  if (password.length < 6) return showErr("signupError", "Password must be at least 6 characters.");
+  if (!terms) return showErr("signupError", "Please agree to the Terms of Service.");
+  setLoading(btn, true, "Create Account");
+  try {
+    const data = await Api.auth.register({ firstName, lastName, email, password });
+    Api.setToken(data.token);
+    Api.setUser(data.user);
+    closeModal("signupModal");
+    Api.toast(`Welcome to ReWear, ${data.user.firstName}! 🎉 You have 100 bonus points.`);
+    Api.updateNav();
+    setTimeout(() => window.location.href = "dashboard.html", 1000);
+  } catch (err) {
+    showErr("signupError", err.message);
+    setLoading(btn, false, "Create Account");
+  }
+});
+
+// ── Featured Items ────────────────────────────────────────────
+const grid = document.getElementById("featuredItems");
+
+async function loadItems(params = {}) {
+  grid.innerHTML = '<div class="loading-cards">' + Array(4).fill('<div class="skeleton-card"></div>').join("") + "</div>";
+  try {
+    const { items } = await Api.items.getAll({ limit: 8, ...params });
+    if (!items.length) { grid.innerHTML = '<p class="empty-msg">No items found.</p>'; return; }
+    grid.innerHTML = items.map(itemCard).join("");
+    grid.querySelectorAll("[data-req]").forEach(btn => btn.addEventListener("click", () => requestItem(+btn.dataset.req, btn)));
+    grid.querySelectorAll("[data-wish]").forEach(btn => btn.addEventListener("click", () => toggleWish(+btn.dataset.wish, btn)));
+  } catch (err) {
+    grid.innerHTML = `<p class="empty-msg" style="color:#dc2626">${err.message}</p>`;
+  }
+}
+
+function itemCard(item) {
+  const img = item.images?.[0] || "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=400";
+  return `<div class="item-card">
+    <div class="item-img-wrap">
+      <img src="${img}" alt="${item.title}" class="item-img" onerror="this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=400'">
+      <span class="item-cond">${Api.fmtStatus(item.condition)}</span>
+      <button class="wish-btn" data-wish="${item.id}" title="Wishlist">♡</button>
+    </div>
+    <div class="item-body">
+      <p class="item-brand">${item.brand || "No brand"} · Size ${item.size}</p>
+      <h4 class="item-title">${item.title}</h4>
+      <div class="item-foot">
+        <span class="item-pts">${item.points} pts</span>
+        <button class="btn-primary btn-sm" data-req="${item.id}">Request</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function requestItem(itemId, btn) {
+  if (!Api.isLoggedIn()) { openModal("loginModal"); return; }
+  const note = prompt("Add a note to the seller (optional):");
+  setLoading(btn, true, "Request");
+  try {
+    await Api.orders.request(itemId, note);
+    btn.textContent = "Requested ✓";
+    btn.style.background = "#16a34a";
+    Api.toast("Request sent! The seller will review it. 🎉");
+  } catch (err) {
+    Api.toastErr(err.message);
+    setLoading(btn, false, "Request");
+  }
+}
+
+async function toggleWish(itemId, btn) {
+  if (!Api.isLoggedIn()) { openModal("loginModal"); return; }
+  try {
+    await Api.wishlist.add(itemId);
+    btn.textContent = "♥"; btn.style.color = "#dc2626";
+    Api.toast("Added to wishlist!");
+  } catch (err) {
+    Api.toastErr(err.message);
+  }
+}
+
+// ── Category filter ───────────────────────────────────────────
+document.querySelectorAll(".cat-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    const cat = btn.dataset.cat;
+    loadItems(cat ? { category: cat } : {});
+  });
+});
+
+loadItems();
+</script>
+</body>
+</html>
