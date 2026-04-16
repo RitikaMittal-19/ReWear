@@ -2,7 +2,7 @@
 // api.js  — ReWear API client
 // IMPORTANT: Update API_BASE to your Render URL before deploying
 // ─────────────────────────────────────────────────────────────
-const API_BASE = "https://rewear-backend-9coe.onrender.com/api";
+const API_BASE = "https://rewear-mehd.onrender.com/api";
 // For local dev swap to: "http://localhost:5000/api"
 
 const Api = (() => {
